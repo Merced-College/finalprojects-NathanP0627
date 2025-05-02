@@ -1,0 +1,1 @@
+Im just building a simple RPG with fights, exploration, and some more features I haven't expanded upon yet. I've set up a lot of the classes for the attacks, enemies, characters, and some of the systems like xp. Later I'll work on the queue combat ststem, inventory with hashmap, and undo botton with stack. 
