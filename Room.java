@@ -2,18 +2,19 @@
 // This is the core data stored inside each node of the linked list.
 public class Room {
     private String description;
+    public Enemy enemy; // ✅ Add this field
 
-    // Constructor assigns the room description
-    public Room(String description) {
+    // ✅ Constructor now accepts description and enemy
+    public Room(String description, Enemy enemy) {
         this.description = description;
+        this.enemy = enemy;
     }
 
-    // Print the room's description
+    // Display the room's description
     public void displayRoom() {
         System.out.println(description);
     }
 
-    // Optional getter if we want to access the description
     public String getDescription() {
         return description;
     }

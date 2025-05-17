@@ -1,21 +1,8 @@
 import java.util.Scanner;
 
-// This class represents rooms in each dungeon using a doubly linked list, will be used to for descriptions
-class Room{
-    String descriptions;
-    Enemy enemy;
-    Room next;
-    Room prev;
-    
-    public Room(String descriptions, Enemy enemy){
-        this.descriptions = descriptions;
-        this.enemy = enemy;
-    }
-}
-
 // Represents the player class
 class Player{
-    String name:
+    String name;
     int hp;
     String job;
     int level;
@@ -28,9 +15,7 @@ class Player{
         this.level = 1;
         this.xp = 0;
     }
-}
-
-// How the player character will attack enemies
+    // How the player character will attack enemies
 public void attack(Enemy enemy){
     int damage = (int)(Math.random() * 10 + 5);
     System.out.println(name + " attacks " + enemy.name + " for " + damage + " damage!");
@@ -47,6 +32,8 @@ public void gainXP(int xpGained){
         System.out.println("You leveled up! You are now level " + level + ".");
     }
 }
+}
+
 
 // Represents the enemies
 class Enemy {
@@ -59,14 +46,13 @@ class Enemy {
         this.level = level;
         this.hp = hp;
     }
-}
-
 // How the enemies attack the player chharacter
-public void enemyattack(Player player){
+    public void enemyattack(Player player){
     int baseDamage = 3;
     int damage = (int)(Math.random() * 5 + baseDamage + level * 2);
     System.out.println(name + " (Lv." + level + ") attacks " + player.name + " for " + damage + " damage!");
     player.hp -= damage;
+    }
 }
 
 
@@ -94,23 +80,40 @@ public class RPG{
 
             // If there's an enemy in the room, trigger battle
             if (currentRoom.enemy != null && currentRoom.enemy.hp > 0) {
-                System.out.println("A wild " + currentRoom.enemy.name + " appears!");
+                Enemy enemy = currentRoom.enemy;
+                System.out.println("A wild " + enemy.name + " appears!");
 
-                while (currentRoom.enemy.hp > 0 && player.hp > 0) {
+                // Queue for enemy actions
+                ActionQueue enemyActions = new ActionQueue();
+                enemyActions.enqueue("attack");
+                enemyActions.enqueue("growl");
+                enemyActions.enqueue("wait");
+
+                while (enemy.hp > 0 && player.hp > 0) {
                     System.out.print("Do you want to (a)ttack or (r)un? ");
                     String action = scanner.nextLine();
 
                     if (action.equalsIgnoreCase("a")) {
-                        player.attack(currentRoom.enemy);
+                        player.attack(enemy);
 
                         if (currentRoom.enemy.hp > 0) {
-                            currentRoom.enemy.enemyattack(player);
+                            String enemyAction = enemyActions.dequeue();
+                            if (enemyAction.equals("attack")) {
+                                enemy.enemyattack(player);
+                            } else if (enemyAction.equals("growl")) {
+                                System.out.println(enemy.name + " growls fiercely!");
+                            } else if (enemyAction.equals("wait")) {
+                                System.out.println(enemy.name + " hesitates...");
+                            }
+
+                            enemyActions.cycleAction(enemyAction); // rotate action
+                            
                         } else {
-                            System.out.println("You defeated the " + currentRoom.enemy.name + "!");
+                            System.out.println("You defeated the " + enemy.name + "!");
                             player.gainXP(10);
                         }
-                    } else if (action.equalsIgnoreCase("r")) {
-                        System.out.println("You run to the previous room... but it's blocked. You must fight!");
+                    } else {
+                        System.out.println("You try to run... but the way is blocked!");
                     }
                 }
 

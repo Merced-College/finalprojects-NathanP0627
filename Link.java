@@ -14,3 +14,4 @@ public class Link {
     public void displayLink() {
         room.displayRoom();
     }
+}
