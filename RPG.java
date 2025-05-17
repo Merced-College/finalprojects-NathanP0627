@@ -1,5 +1,7 @@
 import java.util.Scanner;
 import java.util.HashMap;
+import java.util.Stack;
+
 
 // Represents the player class
 class Player{
@@ -77,7 +79,10 @@ class Enemy {
 // Where everything will run
 public class RPG{
     public static void main(String[] args){
-      Scanner scanner = new Scanner(System.in);
+    Scanner scanner = new Scanner(System.in);
+    // Stores previously visited rooms
+    Stack<Link> roomHistory = new Stack<>(); 
+
 
         // Create player
         System.out.print("Enter your hero's name: ");
@@ -156,21 +161,35 @@ public class RPG{
             }
 
             // Move to the next room in the dungeon
-            current = current.next;
+            if (current.next != null) {
+                roomHistory.push(current);
+                current = current.next;
+            } else {
+                current = null;
+            }
 
             if (current != null) {
-                System.out.print("Press Enter to continue to the next room... or type 'i' to view inventory");
+                System.out.print("Press Enter to continue to the next room... or type 'i' to view inventory or u to undo and go back to the previous room: ");
                 String choice = scanner.nextLine();
                 if (choice.equalsIgnoreCase("i")) {
                     player.printInventory();
+                } else if (choice.equalsIgnoreCase("u")){
+                    if (!roomHistory.isEmpty()) {
+                        // Go back to last room
+                    current = roomHistory.pop();
+                    System.out.println("You retraced your steps to the previous room.");
+                    continue;
+                } else{
+                    System.out.println("\nYou turn around and run out of the dungeon!");
+                    System.out.println("Cowardice has saved your life... for now.");
+                    return; // Exit the game early
                 }
             }
         }
-
+    }
         if (player.hp > 0) {
             System.out.println("\nYou've cleared the dungeon. Congratulations, " + player.name + "!");
-        }
-
-        scanner.close();
+        
     }
+}
 }
