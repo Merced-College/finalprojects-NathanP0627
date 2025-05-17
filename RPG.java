@@ -1,4 +1,4 @@
-import java.util.*;
+import java.util.Scanner;
 
 // This class represents rooms in each dungeon using a doubly linked list, will be used to for descriptions
 class Room{
@@ -37,6 +37,17 @@ public void attack(Enemy enemy){
     enemy.hp -= damage;
 }
 
+// XP system
+public void gainXP(int xpGained){
+    xp += xpGained;
+    if(xp >= level * 10){
+        level++;
+        hp += 10;
+        xp = 0; //Might add a way so that if xp overflows, it goes back into this xp
+        System.out.println("You leveled up! You are now level " + level + ".");
+    }
+}
+
 // Represents the enemies
 class Enemy {
     String name;
@@ -58,21 +69,70 @@ public void enemyattack(Player player){
     player.hp -= damage;
 }
 
-// XP system
-public void gainXP(int xpGained){
-    xp += xpGained;
-    if(xp >= level * 10){
-        level++;
-        hp += 10;
-        xp = 0; //Might add a way so that if xp overflows, it goes back into this xp
-        System.out.println("You leveled up! You are now level " + level + ".");
-    }
-}
-
 
 // Where everything will run
 public class RPG{
     public static void main(String[] args){
+      Scanner scanner = new Scanner(System.in);
 
+        // Create player
+        System.out.print("Enter your hero's name: ");
+        String playerName = scanner.nextLine();
+        Player player = new Player(playerName);
+
+        // Build dungeon using LinkedList
+        LinkedList dungeon = new LinkedList();
+        dungeon.append(new Room("You enter a dark and cold cave.", new Enemy("Goblin", 1, 25)));
+        dungeon.append(new Room("You hear distant bones clattering.", new Enemy("Skeleton", 2, 35)));
+        dungeon.append(new Room("A glowing chest lies in the corner.", null));  // No enemy in last room
+
+        // Traverse dungeon via LinkedList
+        Link current = dungeon.getFirst();
+        while (current != null) {
+            Room currentRoom = current.room;
+            System.out.println("\n>>> " + currentRoom.getDescription());
+
+            // If there's an enemy in the room, trigger battle
+            if (currentRoom.enemy != null && currentRoom.enemy.hp > 0) {
+                System.out.println("A wild " + currentRoom.enemy.name + " appears!");
+
+                while (currentRoom.enemy.hp > 0 && player.hp > 0) {
+                    System.out.print("Do you want to (a)ttack or (r)un? ");
+                    String action = scanner.nextLine();
+
+                    if (action.equalsIgnoreCase("a")) {
+                        player.attack(currentRoom.enemy);
+
+                        if (currentRoom.enemy.hp > 0) {
+                            currentRoom.enemy.enemyattack(player);
+                        } else {
+                            System.out.println("You defeated the " + currentRoom.enemy.name + "!");
+                            player.gainXP(10);
+                        }
+                    } else if (action.equalsIgnoreCase("r")) {
+                        System.out.println("You run to the previous room... but it's blocked. You must fight!");
+                    }
+                }
+
+                if (player.hp <= 0) {
+                    System.out.println("You have fallen in battle. Game Over.");
+                    break;
+                }
+            }
+
+            // Move to the next room in the dungeon
+            current = current.next;
+
+            if (current != null) {
+                System.out.print("Press Enter to continue to the next room...");
+                scanner.nextLine();
+            }
+        }
+
+        if (player.hp > 0) {
+            System.out.println("\nYou've cleared the dungeon. Congratulations, " + player.name + "!");
+        }
+
+        scanner.close();
     }
 }
