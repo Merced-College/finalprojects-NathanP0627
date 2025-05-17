@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.util.HashMap;
 
 // Represents the player class
 class Player{
@@ -7,7 +8,8 @@ class Player{
     String job;
     int level;
     int xp;
-    
+    public HashMap<String, Integer> inventory = new HashMap<>();
+
     public Player(String name){
         this.name = name;
         this.hp = 100;
@@ -16,22 +18,38 @@ class Player{
         this.xp = 0;
     }
     // How the player character will attack enemies
-public void attack(Enemy enemy){
-    int damage = (int)(Math.random() * 10 + 5);
-    System.out.println(name + " attacks " + enemy.name + " for " + damage + " damage!");
-    enemy.hp -= damage;
+    public void attack(Enemy enemy){
+        int damage = (int)(Math.random() * 10 + 5);
+        System.out.println(name + " attacks " + enemy.name + " for " + damage + " damage!");
+        enemy.hp -= damage;
 }
 
 // XP system
-public void gainXP(int xpGained){
-    xp += xpGained;
-    if(xp >= level * 10){
+    public void gainXP(int xpGained){
+        xp += xpGained;
+        if(xp >= level * 10){
         level++;
         hp += 10;
         xp = 0; //Might add a way so that if xp overflows, it goes back into this xp
         System.out.println("You leveled up! You are now level " + level + ".");
     }
 }
+// Add an item to inventory
+    public void addItem(String item) {
+        inventory.put(item, inventory.getOrDefault(item, 0) + 1);
+        System.out.println("You picked up: " + item);
+    }
+
+    public void printInventory(){
+        System.out.println("\n Inventory");
+        if (inventory.isEmpty()){ 
+            System.out.println(" - (empty)");
+        } else {
+            for (String item : inventory.keySet()){
+                System.out.println(" - " + item + " x" + inventory.get(item));
+            }
+        }
+    }
 }
 
 
@@ -68,9 +86,11 @@ public class RPG{
 
         // Build dungeon using LinkedList
         LinkedList dungeon = new LinkedList();
-        dungeon.append(new Room("You enter a dark and cold cave.", new Enemy("Goblin", 1, 25)));
-        dungeon.append(new Room("You hear distant bones clattering.", new Enemy("Skeleton", 2, 35)));
-        dungeon.append(new Room("A glowing chest lies in the corner.", null));  // No enemy in last room
+        dungeon.append(new Room("You enter a dark and cold cave.", new Enemy("Goblin", 1, 25), "Potion"));
+        dungeon.append(new Room("You hear distant bones clattering.", new Enemy("Skeleton", 2, 35), "Key"));
+        dungeon.append(new Room("A glowing chest lies in the corner.", null, "Gold"));  // No enemy in last room
+
+
 
         // Traverse dungeon via LinkedList
         Link current = dungeon.getFirst();
@@ -78,6 +98,12 @@ public class RPG{
             Room currentRoom = current.room;
             System.out.println("\n>>> " + currentRoom.getDescription());
 
+            // ✅ NEW: Collect item if the room has one
+            if (currentRoom.item != null) {
+                player.addItem(currentRoom.item);    // add item to inventory
+                currentRoom.item = null;             // prevent re-collecting
+            }
+            
             // If there's an enemy in the room, trigger battle
             if (currentRoom.enemy != null && currentRoom.enemy.hp > 0) {
                 Enemy enemy = currentRoom.enemy;
@@ -90,8 +116,14 @@ public class RPG{
                 enemyActions.enqueue("wait");
 
                 while (enemy.hp > 0 && player.hp > 0) {
-                    System.out.print("Do you want to (a)ttack or (r)un? ");
+                    System.out.print("Do you want to (a)ttack, (r)un, or view (i)nventory? ");
                     String action = scanner.nextLine();
+
+                    // ✅ NEW: Inventory command in combat
+                    if (action.equalsIgnoreCase("i")) {
+                        player.printInventory();
+                        continue;
+                    }
 
                     if (action.equalsIgnoreCase("a")) {
                         player.attack(enemy);
@@ -127,8 +159,11 @@ public class RPG{
             current = current.next;
 
             if (current != null) {
-                System.out.print("Press Enter to continue to the next room...");
-                scanner.nextLine();
+                System.out.print("Press Enter to continue to the next room... or type 'i' to view inventory");
+                String choice = scanner.nextLine();
+                if (choice.equalsIgnoreCase("i")) {
+                    player.printInventory();
+                }
             }
         }
 

@@ -2,12 +2,14 @@
 // This is the core data stored inside each node of the linked list.
 public class Room {
     private String description;
-    public Enemy enemy; // ✅ Add this field
+    public Enemy enemy;
+    public String item;
 
     // ✅ Constructor now accepts description and enemy
-    public Room(String description, Enemy enemy) {
+    public Room(String description, Enemy enemy, String item) {
         this.description = description;
         this.enemy = enemy;
+        this.item = item;
     }
 
     // Display the room's description
