@@ -78,6 +78,14 @@ class Enemy {
 
 // Where everything will run
 public class RPG{
+    // Adding recursive method to count remaining rooms
+    public static int countRemainingRooms(Link current){
+    if (current == null){
+        return 0;
+    } else {
+        return 1 + countRemainingRooms(current.next);
+    }
+    }
     public static void main(String[] args){
     Scanner scanner = new Scanner(System.in);
     // Stores previously visited rooms
@@ -103,7 +111,7 @@ public class RPG{
             Room currentRoom = current.room;
             System.out.println("\n>>> " + currentRoom.getDescription());
 
-            // ✅ NEW: Collect item if the room has one
+            // Collect item if the room has one
             if (currentRoom.item != null) {
                 player.addItem(currentRoom.item);    // add item to inventory
                 currentRoom.item = null;             // prevent re-collecting
@@ -169,6 +177,9 @@ public class RPG{
             }
 
             if (current != null) {
+                // Shows how many rooms are left using recursive
+                int remaining = countRemainingRooms(current);
+                System.out.println("(There are " + remaining + " room(s) remaining in the dungeon.)");
                 System.out.print("Press Enter to continue to the next room... or type 'i' to view inventory or u to undo and go back to the previous room: ");
                 String choice = scanner.nextLine();
                 if (choice.equalsIgnoreCase("i")) {
